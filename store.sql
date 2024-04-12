@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 10, 2024 at 05:34 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Host: 127.0.0.1:3306
+-- Generation Time: Apr 12, 2024 at 06:24 AM
+-- Server version: 8.2.0
+-- PHP Version: 8.2.13
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,25 +27,25 @@ SET time_zone = "+00:00";
 -- Table structure for table `categories`
 --
 
-CREATE TABLE `categories` (
-  `categoryId` smallint(5) NOT NULL,
-  `categoryName` text NOT NULL,
-  `createdBy` smallint(5) NOT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `categoryId` smallint NOT NULL AUTO_INCREMENT,
+  `categoryName` text COLLATE utf8mb4_general_ci NOT NULL,
+  `createdBy` smallint NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`categoryId`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`categoryId`, `categoryName`, `createdBy`, `createdAt`) VALUES
-(1, 'Gaming', 15, '2024-04-10 12:03:15'),
-(2, 'Medical', 16, '2024-04-10 12:03:52'),
-(3, 'Laptop', 15, '2024-04-10 12:45:01'),
-(4, 'TV', 15, '2024-04-06 07:33:59'),
-(5, 'Smartphone', 15, '2024-04-06 10:59:45'),
-(6, 'Earbuds', 15, '2024-04-06 12:45:35'),
-(7, 'Appliances', 15, '2024-04-06 14:38:16');
+(1, 'Mobile Phone', 19, '2024-04-12 04:04:59'),
+(2, 'Laptop', 19, '2024-04-12 04:05:44'),
+(3, 'Television', 19, '2024-04-12 04:05:53'),
+(4, 'Books', 19, '2024-04-12 04:06:05'),
+(5, 'Mobile Accessories', 19, '2024-04-12 06:01:42');
 
 -- --------------------------------------------------------
 
@@ -53,24 +53,26 @@ INSERT INTO `categories` (`categoryId`, `categoryName`, `createdBy`, `createdAt`
 -- Table structure for table `products`
 --
 
-CREATE TABLE `products` (
-  `productId` smallint(5) NOT NULL,
-  `productName` text NOT NULL,
-  `productDesc` text NOT NULL,
-  `productPrice` int(15) NOT NULL,
-  `categoryId` smallint(5) NOT NULL,
-  `createdBy` int(5) NOT NULL,
-  `productImages` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE IF NOT EXISTS `products` (
+  `productId` smallint NOT NULL AUTO_INCREMENT,
+  `productName` text COLLATE utf8mb4_general_ci NOT NULL,
+  `productDesc` text COLLATE utf8mb4_general_ci NOT NULL,
+  `productPrice` int NOT NULL,
+  `categoryId` smallint NOT NULL,
+  `createdBy` int NOT NULL,
+  `productImages` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  PRIMARY KEY (`productId`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`productId`, `productName`, `productDesc`, `productPrice`, `categoryId`, `createdBy`, `productImages`) VALUES
-(11, 'AirPods Pro (2nd generation)', 'Custom high-excursion Apple driver\r\nCustom high dynamic range amplifier\r\nAdaptive Audio1\r\nActive Noise Cancellation\r\nTransparency mode\r\nConversation Awareness1\r\nPersonalised Volume1\r\nLoud Noise Reduction\r\nVent system for pressure equalisation\r\nPersonalised Spatial Audio with dynamic head tracking2\r\nAdaptive EQ', 24990, 1, 15, '[\"e6360a125298e584-airpods pro.jpeg\",\"63457c6f57ea3e28-airpods__ea3kvnhxv96q_large.jpg\"]'),
-(12, 'MacBook Pro', 'Apple M3 chip with 8-core CPU, 10-core GPU, 16-core Neural Engine\r\n8GB unified memory\r\n512GB SSD storage\r\n35.97 cm (14.2\") Liquid Retina XDR display²\r\n70W USB-C Power Adapter\r\nTwo Thunderbolt / USB 4 ports, HDMI port, SDXC card slot, headphone jack, MagSafe 3 port\r\nBacklit Magic Keyboard with Touch ID - US English', 180000, 3, 15, '[\"849a637c7937ea2c-mbp14-spacegray-gallery2-202310.jpeg\"]'),
-(13, 'iPhone 15 Pro', 'Apple iPhone 15 Pro mobile was launched on 12th September 2023. The phone comes with a 120 Hz refresh rate 6.10-inch touchscreen display offering a resolution of 1179x2556 pixels at a pixel density of 460 pixels per inch (ppi). Apple iPhone 15 Pro is powered by a hexa-core Apple A17 Pro processor. It comes with 8GB of RAM. The Apple iPhone 15 Pro supports wireless charging.', 134900, 5, 15, '[\"ac4ca9373341bf03-iphone-15-pro-finish-select-202309-6-1inch_AV1.jpeg\",\"ed373598efe6eec6-iphone-15-pro-finish-select-202309-6-1inch_AV2_GEO_EMEA.jpeg\"]');
+(1, 'Iphone 15', 'The iPhone 15 and iPhone 15 Plus are smartphones designed, developed, and marketed by Apple Inc. ', 669999, 1, 19, '[\"963b112326de29ae-apple-iphone-15-1.jpg\",\"1c4501a043cf6ff2-gsmarena_005.jpg\",\"99f478b6bd3e7da7-apple-iphone-15-4.jpg\"]'),
+(2, 'MSI Laptop Modern 14', 'World-leading gaming laptop brand - MSI, offers unrivaled gaming experience: from thin & light to top performance, and RGB lighting!', 50000, 2, 19, '[\"89d9e0408d12c74c-Laptop3.jpg\",\"81eb077260eb9e7b-Laptop2.jpg\",\"83a6f821178be1e6-Laptop1.jpg\"]'),
+(3, 'Samsung LED', 'SAMSUNG 32-inch Class LED Smart FHD TV 1080P (UN32N5300AFXZA, 2018 Model), Black', 25000, 3, 19, '[\"810f226edb27e529-LED3.jpg\",\"633dfe060d6f7313-LED2.jpg\",\"3fbdd22376ec3959-LED 1.jpg\"]');
 
 -- --------------------------------------------------------
 
@@ -78,24 +80,23 @@ INSERT INTO `products` (`productId`, `productName`, `productDesc`, `productPrice
 -- Table structure for table `roles`
 --
 
-CREATE TABLE `roles` (
-  `roleId` tinyint(2) NOT NULL,
-  `roleName` tinytext NOT NULL,
-  `userId` smallint(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE IF NOT EXISTS `roles` (
+  `roleId` tinyint NOT NULL AUTO_INCREMENT,
+  `roleName` tinytext COLLATE utf8mb4_general_ci NOT NULL,
+  `userId` smallint NOT NULL,
+  PRIMARY KEY (`roleId`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `roles`
 --
 
 INSERT INTO `roles` (`roleId`, `roleName`, `userId`) VALUES
-(12, 'user', 15),
-(13, 'admin', 16),
-(14, 'user', 17),
-(15, 'user', 18),
-(16, 'user', 19),
-(17, 'user', 20),
-(18, 'user', 21);
+(1, 'user', 19),
+(2, 'user', 20),
+(3, 'user', 21),
+(4, 'user', 22);
 
 -- --------------------------------------------------------
 
@@ -103,82 +104,29 @@ INSERT INTO `roles` (`roleId`, `roleName`, `userId`) VALUES
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
-  `userId` smallint(5) NOT NULL,
-  `firstName` tinytext NOT NULL,
-  `lastName` tinytext NOT NULL,
-  `email` tinytext NOT NULL,
-  `password` text NOT NULL,
-  `gender` enum('Male','Female') NOT NULL,
-  `hobbies` tinytext NOT NULL,
-  `roleName` tinytext NOT NULL,
-  `profilePic` text NOT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `userId` smallint NOT NULL AUTO_INCREMENT,
+  `firstName` tinytext COLLATE utf8mb4_general_ci NOT NULL,
+  `lastName` tinytext COLLATE utf8mb4_general_ci NOT NULL,
+  `email` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` text COLLATE utf8mb4_general_ci NOT NULL,
+  `gender` enum('Male','Female') COLLATE utf8mb4_general_ci NOT NULL,
+  `hobbies` tinytext COLLATE utf8mb4_general_ci NOT NULL,
+  `roleName` tinytext COLLATE utf8mb4_general_ci NOT NULL,
+  `profilePic` text COLLATE utf8mb4_general_ci NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`userId`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`userId`, `firstName`, `lastName`, `email`, `password`, `gender`, `hobbies`, `roleName`, `profilePic`, `createdAt`) VALUES
-(15, 'Pankaj', 'Kumar', 'pk@gmail.com', '$2b$10$55rC/0vt7jKhAU587fi3D.gJsGVYIDDzginsmvkJk0hpa9fTEYL9e', 'Male', 'Coding, Cricket, Gaming', 'user', '9b30a0ddeb804c2c-372497217777264 (1).png', '2024-04-10 11:19:00');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`categoryId`);
-
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`productId`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`roleId`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`userId`),
-  ADD UNIQUE KEY `email` (`email`) USING HASH;
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `categories`
---
-ALTER TABLE `categories`
-  MODIFY `categoryId` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `productId` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `roleId` tinyint(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `userId` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+(19, 'Nishar', 'Alam', 'nishar@gmail.com', '$2b$10$kFkataqWQKwIIex7Oz9AuOay2S3APdAv3rlA1/iWIYUXxmF.PxRPi', 'Male', 'coding, Cricket', 'user', 'e5b55b44cb766a19-nishar.png', '2024-04-12 03:57:08'),
+(21, 'Nishar', 'Alam', 'nisharalam@gmail.com', '$2b$10$CNZMttwWvrPbjp68DR5lkeePCO9TLa9zHtzQ0SLmbiOH/LOe79gvm', 'Male', 'Cricket, Coding', 'user', 'null', '2024-04-12 04:38:18'),
+(22, 'Nishar', 'Alam', 'nalam.netclues@gmail.com', '$2b$10$11IgMMMp3ZZiD.eHhOfxYuJvLHFxWvTozh1fvQWOSugI92EswMz3e', 'Male', 'Cricket, Coding', 'user', '3beafcf48fc2ee01-1711689385685-img.png', '2024-04-12 04:46:33');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
