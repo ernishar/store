@@ -10,6 +10,8 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
 
+  console.log(user);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser({});
@@ -19,6 +21,14 @@ const Header = () => {
 
   useEffect(() => {
     checkTokenExpiration();
+
+    setInterval(() => {
+      checkTokenExpiration();
+    }, 60000);
+
+    return () => {
+      clearInterval();
+    };
   }, []);
 
   const checkTokenExpiration = () => {
@@ -30,7 +40,6 @@ const Header = () => {
 
     try {
       const decodedToken = jwtDecode(authToken);
-      console.log(decodedToken.exp, Math.floor(Date.now() / 1000));
 
       if (decodedToken.exp < Math.floor(Date.now() / 1000)) {
         handleLogout();
@@ -47,16 +56,20 @@ const Header = () => {
     : ``;
 
   return (
-    <Navbar fixed="top" className=" bg-primary container-sm rounded-4">
+    <Navbar fixed="top" className="container-sm bg-primary">
       <Container>
-        
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <div className="d-flex gap-4">
-            {authToken ? (
-              <>
-              <div className="m-0">
-                 <Link to="/profile">
+            {user.email ? (
+              <div className="d-flex justify-content-center align-items-center gap-4">
+                <Link to="/create/product">
+                  <Button variant="primary">Add Product</Button>
+                </Link>
+                <Link to="/list/products">
+                  <Button variant="secondary">Products</Button>
+                </Link>
+                <Link to="/profile">
                   <Image
                     src={profilePic}
                     alt="Profile"
@@ -64,36 +77,21 @@ const Header = () => {
                     width="50"
                   />
                 </Link>
-              </div>
-              <div className="d-flex justify-content-center align-items-center gap-4 ">
-                <Link to="/create/category">
-                  <Button variant="primary">Add Category</Button>
-                </Link>
-                <Link to="/create/product">
-                  <Button variant="primary">Add Product</Button>
-                </Link>
-                <Link to="/list/products">
-                  <Button variant="secondary">Products</Button>
-                </Link>
-               
                 <Button onClick={handleLogout} variant="secondary">
                   Logout
                 </Button>
               </div>
-                </>
             ) : (
               <div className="d-flex justify-content-center align-items-center gap-4">
                 <Link to="/register">
-                  <Button variant="secondary">Register</Button>
+                  <Button variant="light">Register</Button>
                 </Link>
                 <Link to="/login">
                   <Button variant="light">Login</Button>
                 </Link>
               </div>
             )}
-          
           </div>
-          
         </Navbar.Collapse>
       </Container>
     </Navbar>

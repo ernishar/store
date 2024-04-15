@@ -8,8 +8,6 @@ const SearchProduct = () => {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
 
-  console.log(products);
-
   const authToken = localStorage.getItem("token");
 
   useEffect(() => {
@@ -37,10 +35,9 @@ const SearchProduct = () => {
     }
   };
 
-  console.log(products.length);
   return (
     <div className="container-form">
-      <Form onSubmit={handleSearch} className="d-flex search-form container-sm">
+      <Form onSubmit={handleSearch} className="d-flex search-form">
         <Form.Control
           type="search"
           onChange={(e) => setSearch(e.target.value)}
@@ -62,7 +59,7 @@ const SearchProduct = () => {
                 <tr>
                   <th>Title</th>
                   <th>Description</th>
-                  <th>Prices</th>
+                  <th>Launched</th>
                   <th>Category</th>
                 </tr>
               </thead>

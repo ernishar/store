@@ -5,6 +5,7 @@ import { UserContext } from "../../Context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import { FaEdit } from "react-icons/fa";
 
 const UpdateProduct = ({ product }) => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const UpdateProduct = ({ product }) => {
     description: product.productDesc,
     price: product.productPrice,
     category: product.categoryName,
-    images: product.productImages ? JSON.parse(product.productImages) : [],
+    images: [],
   });
 
   const handleEdit = async (e) => {
@@ -93,8 +94,13 @@ const UpdateProduct = ({ product }) => {
 
   return (
     <div className="post-api">
-      <Button variant="outline-light" onClick={handleShow}>
-        <UpdateIcon />
+      <Button
+        variant="outline-light"
+        size="lg"
+        className="rounded-circle text-primary"
+        onClick={handleShow}
+      >
+        <FaEdit />
       </Button>
       <Modal
         show={show}
@@ -170,6 +176,7 @@ const UpdateProduct = ({ product }) => {
               <input
                 onChange={handleImageChange}
                 type="file"
+                accept="image/*"
                 className="form-control"
                 id="productImages"
                 multiple
@@ -180,21 +187,12 @@ const UpdateProduct = ({ product }) => {
                     key={index}
                     className="d-inline-block position-relative me-3"
                   >
-                    {typeof image === "string" ? (
-                      <img
-                        src={
-                          "http://localhost:4000/assets/productImages/" + image
-                        }
-                        alt={`Product Image ${index}`}
-                        style={{ maxWidth: "70px", maxHeight: "70px" }}
-                      />
-                    ) : (
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Newly Uploaded Image ${index}`}
-                        style={{ maxWidth: "70px", maxHeight: "70px" }}
-                      />
-                    )}
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt={`Newly Uploaded Image ${index}`}
+                      style={{ maxWidth: "70px", maxHeight: "70px" }}
+                    />
+
                     <button
                       className="btn btn-sm btn-danger position-absolute top-0 end-0"
                       onClick={(e) => handleRemoveImage(index, e)}
@@ -222,18 +220,3 @@ const UpdateProduct = ({ product }) => {
 };
 
 export default UpdateProduct;
-
-const UpdateIcon = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="25"
-      height="25"
-      fill="blue"
-      className="bi bi-pencil"
-      viewBox="0 0 16 16"
-    >
-      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
-    </svg>
-  );
-};

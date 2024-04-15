@@ -1,87 +1,88 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import { toast } from "sonner";
+import React, { useContext, useEffect, useState } from "react";
+import { Button, Form } from "react-bootstrap";
+import { useForm } from "react-hook-form";
 import { IoCloseCircleSharp } from "react-icons/io5";
-
-import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import * as yup from "yup";
 import { UserContext } from "../../Context/UserContext";
+import CreateCategory from "../Category/CreateCategory";
+
+const ErroMess = {
+  message: "This is required",
+};
+
+const ProductSchema = yup.object().shape({
+  productName: yup.string().required(ErroMess.message),
+  productDesc: yup.string().required(ErroMess.message),
+  productPrice: yup.number().required(ErroMess.message),
+  categoryName: yup.string().required(ErroMess.message),
+  productImages: yup
+    .mixed()
+    .test("file", "You need to provide a file", (value) => {
+      if (value.length > 0) {
+        return true;
+      }
+      return false;
+    })
+    .test("fileSize", "image should be less than 1MB", (files) => {
+      for (let i = 0; i < files.length; i++) {
+        if (files[i].size > 1000000) {
+          return false;
+        }
+      }
+      return true;
+    }),
+});
 
 const CreateProduct = () => {
+  const { fetchCategories, categories } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
+  const [productImages, setProductImages] = useState([]);
   const navigate = useNavigate();
 
-  const { fetchProducts } = useContext(UserContext);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    productName: "",
-    productDesc: "",
-    productPrice: "",
-    categoryName: "",
-    productImages: [],
-  });
-
-  const [categories, setCategories] = useState([]);
   const authToken = localStorage.getItem("token");
 
+  // Initialize formData
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(ProductSchema),
+  });
+
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (!authToken) {
       navigate("/login");
     }
   }, [authToken, navigate]);
 
+  // Fetch categories
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:4000/api/get/category",
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching categories: ", error);
-    }
-  };
-
-  //Insert product
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
+  // Handle form submit
+  const handleFormSubmit = async (data) => {
     setLoading(true);
+    const productData = new FormData();
+    productData.append("productName", data.productName);
+    productData.append("productDesc", data.productDesc);
+    productData.append("productPrice", data.productPrice);
+    productData.append("categoryName", data.categoryName);
 
-    const {
-      productName,
-      productDesc,
-      productPrice,
-      categoryName,
-      productImages,
-    } = formData;
-
-    if (!productName || !productDesc || !productPrice || !categoryName) {
-      setLoading(false);
-      toast.error("Please fill all the fields");
-      return;
+    for (let i = 0; i < productImages.length; i++) {
+      productData.append("productImages", productImages[i]);
     }
-
-    const postData = new FormData();
-    postData.append("productName", productName);
-    postData.append("productDesc", productDesc);
-    postData.append("productPrice", productPrice);
-    postData.append("categoryName", categoryName);
-    productImages.forEach((image) => {
-      postData.append("productImages", image);
-    });
 
     try {
       const response = await axios.post(
         "http://localhost:4000/api/create/product",
-        postData,
+        productData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -90,16 +91,8 @@ const CreateProduct = () => {
         }
       );
       if (response.data.message === "success") {
-        setFormData({
-          productName: "",
-          productDesc: "",
-          productPrice: "",
-          categoryName: "",
-          productImages: [],
-        });
         toast.success("Product Added");
         navigate("/list/products");
-        fetchProducts();
         setLoading(false);
       } else {
         toast.error("There is something wrong");
@@ -120,87 +113,67 @@ const CreateProduct = () => {
     toast.error(errorMessage);
   };
 
-  //Handle category change
-  const handleCategoryChange = (e) => {
-    setFormData({ ...formData, categoryName: e.target.value });
-  };
-
-  //Handle image change
+  // Handle image change
   const handleImageChange = (e) => {
     const files = e.target.files;
-
-    console.log(files);
-    const imagesArray = [...formData.productImages];
-    for (let i = 0; i < files.length; i++) {
-      imagesArray.push(files[i]);
-    }
-    setFormData({ ...formData, productImages: imagesArray });
+    setProductImages([...productImages, ...files]);
   };
 
+  // Handle remove image
   const handleRemoveImage = (index, e) => {
     e.preventDefault();
-    const updatedImages = [...formData.productImages];
-    updatedImages.splice(index, 1);
-    setFormData({ ...formData, productImages: updatedImages });
+    const updatedImages = productImages.filter((image, i) => i !== index);
+    setProductImages(updatedImages);
   };
 
   return (
     <div className="sign-in__wrapper">
       <h3>Add Product</h3>
-      <form className="shadow p-4 bg-white rounded" onSubmit={handleFormSubmit}>
-        <div className="mb-3">
-          <label htmlFor="productName" className="form-label">
-            Product Name
-          </label>
-          <input
-            onChange={(e) =>
-              setFormData({ ...formData, productName: e.target.value })
-            }
-            type="text"
-            className="form-control"
-            id="productName"
-            placeholder="Product Name"
-            value={formData.productName}
+      <Form
+        name="form"
+        className="shadow p-4 bg-white rounded"
+        onSubmit={handleSubmit(handleFormSubmit)}
+      >
+        <Form.Group className="mb-2" controlId="productName">
+          <Form.Label>Product Name</Form.Label>
+          <Form.Control
+            isInvalid={errors.productName}
+            {...register("productName")}
           />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="productDesc" className="form-label">
-            Description
-          </label>
-          <textarea
-            onChange={(e) =>
-              setFormData({ ...formData, productDesc: e.target.value })
-            }
-            className="form-control"
-            id="productDesc"
-            placeholder="Description"
-            value={formData.productDesc}
+          <Form.Control.Feedback type="invalid">
+            {errors.productName?.message}
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-2" controlId="productDesc">
+          <Form.Label>Product Description</Form.Label>
+          <Form.Control
+            isInvalid={errors.productDesc}
+            {...register("productDesc")}
+            as="textarea"
           />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="productPrice" className="form-label">
-            Price
-          </label>
-          <input
-            onChange={(e) =>
-              setFormData({ ...formData, productPrice: e.target.value })
-            }
-            type="number"
-            className="form-control"
-            id="productPrice"
-            placeholder="Price"
-            value={formData.productPrice}
+          <Form.Control.Feedback type="invalid">
+            {errors.productDesc?.message}
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-2" controlId="productPrice">
+          <Form.Label>Price</Form.Label>
+          <Form.Control
+            isInvalid={errors.productPrice}
+            {...register("productPrice")}
           />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="category" className="form-label">
-            Category
-          </label>
-          <select
-            onChange={handleCategoryChange}
-            className="form-control"
-            id="category"
-            value={formData.categoryName}
+          <Form.Control.Feedback type="invalid">
+            {errors.productPrice?.message}
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-2" controlId="categoryName">
+          <Form.Label>Category</Form.Label>
+          <Form.Control
+            isInvalid={errors.categoryName}
+            {...register("categoryName")}
+            as="select"
           >
             <option value="">Select a category</option>
             {categories.map((category, index) => (
@@ -208,21 +181,31 @@ const CreateProduct = () => {
                 {category.categoryName}
               </option>
             ))}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="productImages" className="form-label">
-            Product Images
-          </label>
-          <input
-            onChange={handleImageChange}
+          </Form.Control>
+          <Form.Control.Feedback type="invalid">
+            {errors.categoryName?.message}
+          </Form.Control.Feedback>
+          <div className="text-muted mt-2 gap-2 d-flex align-items-center">
+            Can't find your category?
+            <CreateCategory fetchCategories={fetchCategories} />
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-2" controlId="productImages">
+          <Form.Label>Product Images</Form.Label>
+          <Form.Control
+            {...register("productImages")}
             type="file"
-            className="form-control"
-            id="productImages"
+            accept="image/*"
             multiple
+            onChange={handleImageChange}
+            isInvalid={errors.productImages}
           />
+          <Form.Control.Feedback type="invalid">
+            {errors?.productImages?.message}
+          </Form.Control.Feedback>
           <div className="mt-3">
-            {formData.productImages.map((image, index) => (
+            {productImages.map((image, index) => (
               <div
                 key={index}
                 className="d-inline-block position-relative me-3"
@@ -232,22 +215,31 @@ const CreateProduct = () => {
                   alt={`Product Image ${index}`}
                   style={{ maxWidth: "70px", maxHeight: "70px" }}
                 />
-                <button
-                  className="btn btn-sm btn-danger position-absolute top-0 end-0"
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="position-absolute top-0 end-0"
                   onClick={(e) => handleRemoveImage(index, e)}
                 >
                   <IoCloseCircleSharp />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
-        </div>
+        </Form.Group>
+
         <div className="d-grid gap-2">
-          <button className="btn btn-primary" type="submit">
-            Add Product
-          </button>
+          {loading ? (
+            <Button variant="primary" type="submit" disabled>
+              Adding Product...
+            </Button>
+          ) : (
+            <Button variant="primary" type="submit">
+              Add Product
+            </Button>
+          )}
         </div>
-      </form>
+      </Form>
     </div>
   );
 };

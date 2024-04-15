@@ -6,6 +6,7 @@ const sequelize = require("./utils/sequelize");
 const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const routes = require('./routes/emailRoutes')
 const cookieParser = require("cookie-parser");
 
 
@@ -30,7 +31,7 @@ app.use(
 );
 
 // All Routes
-app.use("/api/", userRoutes, categoryRoutes, productRoutes);
+app.use("/api/", userRoutes, categoryRoutes, productRoutes,routes);
 
 // Default Route
 app.get("/", (req, res) => {

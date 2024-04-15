@@ -1,141 +1,112 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import { Button, Container, Form, Modal } from "react-bootstrap";
 import { toast } from "sonner";
-import { IoCloseCircleSharp } from "react-icons/io5";
+import axios from "axios";
 
-import { useContext } from "react";
-import { UserContext } from "../../Context/UserContext";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
-const CreateCategory = () => {
-  const navigate = useNavigate();
+const errMessage = {
+  message: "Category Name is required",
+};
 
-  const { fetchProducts } = useContext(UserContext);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    categoryName: "",
+const CategorySchema = yup.object().shape({
+  categoryName: yup.string().required(errMessage.message),
+});
+
+const CreateCategory = ({ fetchCategories }) => {
+  const {
+    register: CreateCategoryForm,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(CategorySchema),
   });
 
-  const authToken = localStorage.getItem("token");
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
-  useEffect(() => {
-    if (!authToken) {
-      navigate("/login");
-    }
-  }, [authToken, navigate]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:4000/api/get/category",
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching categories: ", error);
-    }
-  };
-
-  //Insert Ctegory
-  const handleFormSubmit = async (e) => {
+  const handleCreateCategory = async (data, e) => {
     e.preventDefault();
-    setLoading(true);
-
-    const {
-      categoryName
-    } = formData;
-
-    if ( !categoryName) {
-      setLoading(false);
-      toast.error("Please Fill Category Name");
-      return;
-    }
-
-    const postData = new FormData();
-    
-    postData.append("categoryName", categoryName);
-
+    e.stopPropagation();
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/create/category",
-        postData,
+        `http://localhost:4000/api/create/category`,
+        {
+          categoryName: data.categoryName,
+        },
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+            contentType: "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      if (response.data.message === "success") {
-        setFormData({
-          categoryName: "",
-
-        });
-        toast.success("Category Added");
-        navigate("home");
-        fetchProducts();
-        setLoading(false);
-      } else {
-        toast.error("There is something wrong");
+      if (response.status === 200) {
+        toast.success("Category Created Successfully");
+        fetchCategories();
+        handleClose();
+        data.categoryName = "";
       }
     } catch (error) {
-      setLoading(false);
-      handleError(error);
+      if (error.response.status === 400) {
+        toast.error("Category already exists");
+      }
     }
   };
-
-  const handleError = (error) => {
-    let errorMessage = "An error occurred. Please try again.";
-    if (error.response && error.response.status === 400) {
-      errorMessage = error.response.data.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    toast.error(errorMessage);
-  };
-
-  //Handle category change
-  const handleCategoryChange = (e) => {
-    setFormData({ ...formData, categoryName: e.target.value });
-  };
-
-
 
   return (
-    <div className="sign-in__wrapper">
-      <h3>Add Category</h3>
-      <form className="shadow p-4 bg-white rounded" onSubmit={handleFormSubmit}>
-        <div className="mb-3">
-          <label htmlFor="categoryName" className="form-label">
-            Category Name
-          </label>
-          <input
-            onChange={(e) =>
-              setFormData({ ...formData, categoryName: e.target.value })
-            }
-            type="text"
-            className="form-control"
-            id="categoryName"
-            placeholder="Category Name"
-            value={formData.categoryName}
-          />
-        </div>
+    <div>
+      <Button
+        variant="ghost"
+        className="bg-light text-primary"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleShow();
+        }}
+      >
+        Create Category
+      </Button>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Container>
+          <Modal.Header>
+            <Modal.Title>Create Category</Modal.Title>
+          </Modal.Header>
 
-        <div className="d-grid gap-2">
-          <button className="btn btn-primary" type="submit">
-            Add Category
-          </button>
-        </div>
-      </form>
+          <Form onSubmit={handleSubmit(handleCreateCategory)}>
+            <Modal.Body>
+              <Form.Group controlId="categoryName">
+                <Form.Label>Category Name</Form.Label>
+                <Form.Control
+                  name="categoryName"
+                  placeholder="Enter Category Name"
+                  {...CreateCategoryForm("categoryName")}
+                  isInvalid={errors.categoryName}
+                />
+              </Form.Group>
+              <Form.Control.Feedback type="invalid">
+                {errors.categoryName?.message}
+              </Form.Control.Feedback>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary">
+                Create Category
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Container>
+      </Modal>
     </div>
   );
 };

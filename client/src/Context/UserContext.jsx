@@ -6,12 +6,10 @@ export const UserContext = createContext({});
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
   const [products, setProducts] = useState([]);
-  // const [token, setToken] = useState({});
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // setToken(localStorage.getItem("token"));
     getProfile();
-    fetchProducts();
   }, []);
 
   const getProfile = async () => {
@@ -52,9 +50,35 @@ export const UserContextProvider = ({ children }) => {
     } catch (error) {}
   };
 
+  // Fetch categories
+  const fetchCategories = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/api/get/category",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCategories(response.data.categories);
+    } catch (error) {
+      console.error("Error fetching categories: ", error);
+    }
+  };
+
   return (
     <UserContext.Provider
-      value={{ user, setUser, products, fetchProducts, getProfile }}
+      value={{
+        user,
+        products,
+        categories,
+        setUser,
+        fetchProducts,
+        fetchCategories,
+        getProfile,
+      }}
     >
       {children}
     </UserContext.Provider>

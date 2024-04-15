@@ -13,7 +13,7 @@ const Home = () => {
           <Col md={8} className="text-center">
             <h1>Welcome to Our Store</h1>
             <p className="lead">
-              Explore Our Store Search here Your Faverate product.
+              Discover amazing products for your everyday needs.
             </p>
             {user.userId ? (
               <SearchProduct />
